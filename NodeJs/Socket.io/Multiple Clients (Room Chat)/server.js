@@ -1,8 +1,28 @@
 const { Server } = require("socket.io");
 const io = new Server(3000);
 
+console.log("listening on port 3000");
+
 const rooms = {};
 io.on("connection", (socket) => {
+
+    socket.on("disconnect", () => {
+        const roomKeys = Object.keys(rooms);
+        roomKeys.forEach((room) => {
+            const clients = rooms[room].clients;
+
+            if(!clients[socket.id]) return;
+
+            console.log(clients[socket.id].name, "disconnected");
+            delete clients[socket.id];
+
+            if (Object.keys(clients).length === 0) {
+                console.log("room", room, "deleted");
+                delete rooms[room];
+            }
+        })
+
+    })
 
     socket.on('new user', (payload) => {
         console.log("New user connected: " + payload.name);
