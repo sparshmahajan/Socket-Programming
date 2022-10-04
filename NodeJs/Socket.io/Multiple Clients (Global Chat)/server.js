@@ -1,9 +1,15 @@
 const { Server } = require("socket.io");
 const io = new Server(3000);
 
+console.log("listening on port 3000");
 const clients = {};
 io.on("connection", (socket) => {
     clients[socket.id] = { name: null, socket };
+
+    socket.on('disconnect', () => {
+        console.log(clients[socket.id].name + " disconnected");
+        delete clients[socket.id];
+    })
 
     socket.on('new user', (name) => {
         console.log("New user connected: " + name);
