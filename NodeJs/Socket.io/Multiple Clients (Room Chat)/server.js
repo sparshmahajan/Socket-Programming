@@ -11,10 +11,18 @@ io.on("connection", (socket) => {
         roomKeys.forEach((room) => {
             const clients = rooms[room].clients;
 
-            if(!clients[socket.id]) return;
+            if (!clients[socket.id]) return;
 
-            console.log(clients[socket.id].name, "disconnected");
+            const name = clients[socket.id].name;
+            console.log(`${name} disconnected`);
             delete clients[socket.id];
+
+            Object.keys(clients).forEach((client) => {
+                const payload = {
+                    msg: `has left the chat`, name,
+                }
+                clients[client].socket.emit("chat message", payload);
+            })
 
             if (Object.keys(clients).length === 0) {
                 console.log("room", room, "deleted");

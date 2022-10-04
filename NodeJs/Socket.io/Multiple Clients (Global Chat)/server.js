@@ -7,8 +7,16 @@ io.on("connection", (socket) => {
     clients[socket.id] = { name: null, socket };
 
     socket.on('disconnect', () => {
-        console.log(clients[socket.id].name + " disconnected");
+        const name = clients[socket.id].name;
+        console.log(`${name} disconnected`);
         delete clients[socket.id];
+
+        Object.keys(clients).forEach((client) => {
+            const payload = {
+                msg: `has left the chat`, name,
+            }
+            clients[client].socket.emit("chat message", payload);
+        });
     })
 
     socket.on('new user', (name) => {
