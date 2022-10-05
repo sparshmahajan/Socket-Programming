@@ -156,7 +156,7 @@ const sendMsg = () => {
         input: process.stdin, output: process.stdout,
     });
     rl.question(">> ", (msg) => {
-        const payload = { msg, name: isUsernameSaved, roomId };
+        const payload = { msg, roomId };
 
         socket.emit("chat message", payload);
 
