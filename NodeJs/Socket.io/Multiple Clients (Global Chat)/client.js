@@ -4,7 +4,7 @@ const readline = require("readline");
 
 //singleton readline interface
 let rl = null;
-let username = null;
+let isUsernameSaved = null;
 
 /**
  * @description
@@ -29,7 +29,7 @@ socket.on("chat message", (payload) => {
      * and name of other users cannot be saved so,
      * it keeps asking for name on every msg received
      */
-    if (username == null) getName();
+    if (isUsernameSaved == null) getName();
     // otherwise, message prompt will continue to be shown for every msg received
     else sendMsg();
 });
@@ -70,7 +70,7 @@ const getName = () => {
         socket.emit("new user", name);
 
         //save the name
-        username = name;
+        isUsernameSaved = name;
 
         //start the message prompt for this user
         sendMsg();

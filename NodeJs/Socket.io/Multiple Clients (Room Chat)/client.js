@@ -4,7 +4,7 @@ const readline = require("readline");
 
 //singleton readline interface
 let rl = null;
-let username = null;
+let isUsernameSaved = null;
 let roomId = null;
 
 /**
@@ -32,7 +32,7 @@ socket.on("chat message", (payload) => {
      * and name of other users cannot be saved so,
      * it keeps asking for name on every msg received
      */
-    if (!username) getName();
+    if (!isUsernameSaved) getName();
     // otherwise, message prompt will continue to be shown for every msg received
     else sendMsg();
 });
@@ -111,7 +111,7 @@ const joinRoom = () => {
         input: process.stdin, output: process.stdout,
     });
     rl.question("Enter room id: ", (id) => {
-        const payload = { name: username, roomId: id };
+        const payload = { name: isUsernameSaved, roomId: id };
 
         //emit the join room event to the server
         socket.emit("join room", payload);
@@ -136,7 +136,7 @@ const getName = () => {
         //emit the new user event to the server
         socket.emit("new user", payload);
         //save the username for future use
-        username = name;
+        isUsernameSaved = name;
 
         //start the message prompt for this user
         sendMsg();
@@ -156,7 +156,7 @@ const sendMsg = () => {
         input: process.stdin, output: process.stdout,
     });
     rl.question(">> ", (msg) => {
-        const payload = { msg, name: username, roomId };
+        const payload = { msg, name: isUsernameSaved, roomId };
 
         socket.emit("chat message", payload);
 
