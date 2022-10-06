@@ -4,14 +4,16 @@ import java.net.Socket;
 
 public class Server {
 
+    static ServerSocket serverSocket;
+
     public static void main(String[] args) {
         try {
             // Create a server socket
-            ServerSocket server = new ServerSocket(1234);
+            serverSocket = new ServerSocket(1234);
             System.out.println("Server is running...");
 
             // Listen for a connection request
-            Socket socket = server.accept();
+            Socket socket = serverSocket.accept();
 
             // Separate Thread for reading from the client
             new Thread(() -> {
@@ -25,7 +27,7 @@ public class Server {
                         // Display to the console
                         System.out.println("Client: " + str);
                     } catch (IOException e) {
-                        System.out.println("Error Reading From Client");
+                        System.out.println("Client Disconnected");
 
                         // Close the socket
                         closeSocket(socket);

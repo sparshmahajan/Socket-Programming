@@ -3,9 +3,11 @@ import java.net.Socket;
 
 public class Client {
 
+    static Socket socket;
+    
     public static void main(String[] args) {
         try {
-            Socket socket = new Socket("localhost", 1234);
+            socket = new Socket("localhost", 1234);
             System.out.println("Connected to Server");
 
             // Separate Thread for reading from the server
@@ -20,7 +22,7 @@ public class Client {
                         // Display to the console
                         System.out.println("Server: " + str);
                     } catch (Exception e) {
-                        System.out.println("Error Reading From Server");
+                        System.out.println("Server Disconnected");
 
                         // Close the socket
                         closeSocket(socket);
@@ -52,8 +54,7 @@ public class Client {
                 }
             }).start();
         } catch (IOException e) {
-            System.out.println("Error Creating Socket");
-            System.out.println("Start the Server first then Client");
+            System.out.println("Error Connecting To Server");
         }
     }
 
