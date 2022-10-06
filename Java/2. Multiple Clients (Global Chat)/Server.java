@@ -1,113 +1,219 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Server {
+    // Client class for storing client information
+    static class Client {
+        String clientId;
+        String clientName;
+        BufferedReader reader;
+        BufferedWriter writer;
+        Socket socket;
+    }
+
+    // Constants
+    public static final String METHOD_GET_ID = "get id";
+    public static final String METHOD_NEW_USER = "new user";
+    public static final String METHOD_SEND_MSG = "send message";
+
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_USER_ID = "userId";
+    public static final String KEY_USER_NAME = "userName";
+    public static final String KEY_MESSAGE = "message";
 
     ServerSocket serverSocket;
-    static ArrayList<ClientsHandler> clientHandlers;
 
-    public Server(ServerSocket serverSocket) {
+    // List of clients
+    List<Client> clients;
+
+    Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
-        clientHandlers = new ArrayList<>();
+        this.clients = new ArrayList<>();
     }
 
+
     /**
-     * Method to start the server and receive connections
+     * Method to start the server
      */
     public void startServer() {
-        try {
-            //server socket will run indefinitely for new clients
-            while (!serverSocket.isClosed()) {
-                //execution will stop here until a client connects
+        while (!serverSocket.isClosed()) {
+            try {
+                //wait for client to connect
                 Socket socket = serverSocket.accept();
-                //when a client connects, a new thread will be created to handle the client
-                Thread thread = new Thread(new ClientsHandler(socket));
-                thread.start();
+
+                //create a new client
+                Client client = new Client();
+                client.socket = socket;
+                client.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                client.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+                //generate a unique id for the client and send it to the client
+                client.clientId = Utils.generateId();
+                sendIDToClient(client);
+                clients.add(client);
+
+                //forward each client to a new thread
+                new Thread(() -> {
+                    while (!client.socket.isClosed()) {
+                        try {
+                            //read data from client
+                            String data = client.reader.readLine();
+
+                            //parse the data to a map
+                            Map<String, String> map = Utils.messageToMap(data);
+
+                            //if method new user
+                            if (map.get(KEY_TYPE).equals(METHOD_NEW_USER)) {
+                                newClient(map);
+                            }
+                            //if method send message
+                            else if (map.get(KEY_TYPE).equals(METHOD_SEND_MSG)) {
+                                sendChat(map);
+                            }
+                        } catch (Exception e) {
+                            disconnectClient(client);
+                        }
+                    }
+                }).start();
+            } catch (Exception e) {
+                System.out.println("Server Disconnected");
             }
-        } catch (Exception e) {
-            closeServer(this.serverSocket);
         }
     }
 
+
     /**
-     * Method to Close the server in case of an exception
+     * Method for sending id to the client
      *
-     * @param serverSocket the server socket to close
+     * @param client client to send the id to
      */
-    public void closeServer(ServerSocket serverSocket) {
-        if (serverSocket != null) try {
-            serverSocket.close();
+    public void sendIDToClient(Client client) {
+        try {
+            Map<String, String> map = new HashMap<>();
+            map.put(Server.KEY_USER_ID, client.clientId);
+            map.put(Server.KEY_USER_NAME, client.clientName);
+            map.put(Server.KEY_TYPE, Server.METHOD_GET_ID);
+            client.writer.write(map.toString());
+            client.writer.newLine();
+            client.writer.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error sending id to client");
         }
     }
 
-    /**
-     * Method to broadcast a message to all clients
-     *
-     * @param message the message to be sent
-     */
-    public static void broadcastMessage(String message, String sender) {
-        for (ClientsHandler clients : Server.clientHandlers) {
 
-            //send the message to all clients except the sender
-            if (clients.userName.equals(sender)) continue;
+    /**
+     * Method to send a unique id to the client
+     *
+     * @param map map containing the client information
+     */
+    private void newClient(Map<String, String> map) {
+        String senderId = map.get(KEY_USER_ID);
+        String senderName = map.get(KEY_USER_NAME);
+
+        //searching for the client
+        for (Client c : clients) {
+            if (c.clientId.equals(senderId)) {
+                //set the client name
+                c.clientName = senderName;
+                break;
+            }
+        }
+        System.out.println("Client Connected: " + senderName);
+
+        //broadcast the new client to all the clients
+        broadcastMessage("joined the chat", senderId, senderName);
+    }
+
+
+    /**
+     * Method to send a message to all the clients
+     *
+     * @param map map containing the message information
+     */
+    private void sendChat(Map<String, String> map) {
+        String senderId = map.get(KEY_USER_ID);
+        String senderName = map.get(KEY_USER_NAME);
+        String msg = map.get(KEY_MESSAGE);
+
+        //broadcast the message to all the clients
+        broadcastMessage(msg, senderId, senderName);
+    }
+
+
+    /**
+     * Method to disconnect a client
+     *
+     * @param client client to disconnect
+     */
+    public void disconnectClient(Client client) {
+        System.out.println("Client Disconnected");
+
+        //remove the client from the list
+        clients.remove(client);
+
+        //broadcast the client disconnection to all the clients
+        broadcastMessage("left the chat", client.clientId, client.clientName);
+        try {
+            client.socket.close();
+
+            //terminate the thread of the client
+            Thread.currentThread().join();
+        } catch (Exception ex) {
+            System.out.println("Error in disconnecting client");
+        }
+    }
+
+
+    /**
+     * Method to broadcast a message to all the clients
+     *
+     * @param message    message to broadcast
+     * @param senderId   id of the sender
+     * @param senderName name of the sender
+     */
+    public void broadcastMessage(String message, String senderId, String senderName) {
+
+        for (Client client : clients) {
+            //send the message to all the clients except the sender
+            if (client.clientId.equals(senderId)) continue;
 
             try {
-                clients.writer.write(message);
-                clients.writer.newLine();
-                clients.writer.flush();
+                Map<String, String> map = new HashMap<>();
+                map.put(Server.KEY_TYPE, Server.METHOD_SEND_MSG);
+                map.put(Server.KEY_MESSAGE, message);
+                map.put(Server.KEY_USER_NAME, senderName);
+
+                client.writer.write(map.toString());
+                client.writer.newLine();
+                client.writer.flush();
             } catch (Exception e) {
-                closeClient(clients.userName, clients.socket, clients.reader, clients.writer, clients);
+                System.out.println("Error broadcasting message");
             }
         }
     }
 
+
     /**
-     * Method to close a client connection
-     *
-     * @param username       the username of the client
-     * @param socket         the socket of the client
-     * @param reader         bufferedReader of the client
-     * @param writer         bufferedWriter of the client
-     * @param clientsHandler list of clients
+     * Main method to start the server
      */
-    public static void closeClient(
-            String username,
-            Socket socket,
-            BufferedReader reader,
-            BufferedWriter writer,
-            ClientsHandler clientsHandler
-    ) {
-        try {
-            if (socket != null) socket.close();
-            if (reader != null) reader.close();
-            if (writer != null) writer.close();
-            clientHandlers.remove(clientsHandler);
-            broadcastMessage(username + " has left the chat", username);
-
-            //closing the current thead if the client is disconnected
-            Thread.currentThread().join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public static void main(String[] args) {
+        ServerSocket serverSocket;
         try {
-            //create a server socket
-            ServerSocket serverSocket = new ServerSocket(1234);
-            System.out.println("Server started...");
-            Server server = new Server(serverSocket);
+            //create a new server socket
+            serverSocket = new ServerSocket(8080);
+            System.out.println("Server running on port 8080");
 
-            //start the server
+            //create a new server
+            Server server = new Server(serverSocket);
             server.startServer();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error starting server on port 8080");
         }
     }
 }
