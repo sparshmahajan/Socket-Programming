@@ -80,11 +80,11 @@ public class Client {
      */
     private static void getIdFromServer(Map<String, String> payload) {
         clientId = payload.get(Server.KEY_USER_ID);
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your name: ");
-        clientName = scanner.nextLine();
-        newUser();
+
+        getName();
         new Thread(Client::sendMessageToServer).start();
+
+        System.out.println("Entered the global chat");
     }
 
 
@@ -103,7 +103,10 @@ public class Client {
     /**
      * Method to send a new user to the server
      */
-    public static void newUser() {
+    public static void getName() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your name: ");
+        clientName = scanner.nextLine();
         try {
             Map<String, String> payload = new HashMap<>();
             payload.put(Server.KEY_USER_ID, clientId);

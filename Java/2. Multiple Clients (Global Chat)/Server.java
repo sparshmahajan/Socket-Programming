@@ -117,10 +117,9 @@ public class Server {
         String senderName = map.get(KEY_USER_NAME);
 
         //searching for the client
-        for (Client c : clients) {
-            if (c.clientId.equals(senderId)) {
-                //set the client name
-                c.clientName = senderName;
+        for (int i = 0; i < clients.size(); i++) {
+            if(clients.get(i).clientId.equals(senderId)){
+                clients.get(i).clientName = senderName;
                 break;
             }
         }
@@ -152,7 +151,7 @@ public class Server {
      * @param client client to disconnect
      */
     public void disconnectClient(Client client) {
-        System.out.println("Client Disconnected");
+        System.out.println("Client Disconnected: " + client.clientName);
 
         //remove the client from the list
         clients.remove(client);
