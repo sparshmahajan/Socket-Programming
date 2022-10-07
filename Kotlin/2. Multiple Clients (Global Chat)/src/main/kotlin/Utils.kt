@@ -18,7 +18,7 @@ class Utils {
          * @return convert  map
          */
         fun messageToMap(data: String): Map<String, String> {
-            val map: MutableMap<String, String> = HashMap()
+            val map = mutableMapOf<String, String>()
             val pairs = data.substring(1, data.length - 1).split(", ")
             for (pair in pairs) {
                 val keyValue = pair.trim { it <= ' ' }.split("=")

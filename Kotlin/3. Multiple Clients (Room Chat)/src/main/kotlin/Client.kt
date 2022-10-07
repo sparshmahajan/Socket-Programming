@@ -25,7 +25,7 @@ object Client {
             var msg: String?
             while (socket!!.isConnected) {
                 msg = scanner.nextLine()
-                val payload: MutableMap<String, String?> = HashMap()
+                val payload = mutableMapOf<String?, String?>()
                 payload[Server.KEY_MESSAGE] = msg
                 payload[Server.KEY_USER_ID] = clientId
                 payload[Server.KEY_USER_NAME] = clientName
@@ -50,7 +50,7 @@ object Client {
                 val data = reader!!.readLine()
 
                 //parse the data to a map
-                val payload: Map<String, String> = Utils.messageToMap(data)
+                val payload = Utils.messageToMap(data)
 
                 //if method get id
                 if (payload[Server.KEY_TYPE] == Server.METHOD_GET_ID) {
@@ -154,7 +154,7 @@ object Client {
         clientName = scanner.nextLine()
         return try {
             //send the name to the server
-            val payload: MutableMap<String, String?> = HashMap()
+            val payload = mutableMapOf<String?, String?>()
             payload[Server.KEY_USER_ID] = clientId
             payload[Server.KEY_USER_NAME] = clientName
             payload[Server.KEY_ROOM_ID] = roomId.toString()
@@ -196,7 +196,7 @@ object Client {
     private fun createRoom() {
         try {
             //send req to the server to create a room
-            val payload: MutableMap<String, String> = HashMap()
+            val payload = mutableMapOf<String?, String?>()
             payload[Server.KEY_TYPE] = Server.METHOD_CREATE_ROOM
             writer!!.write(payload.toString())
             writer!!.newLine()
@@ -216,7 +216,7 @@ object Client {
         val roomId = scanner.nextLine()
         try {
             //send req to the server to join a room
-            val payload: MutableMap<String, String> = HashMap()
+            val payload = mutableMapOf<String?, String?>()
             payload[Server.KEY_TYPE] = Server.METHOD_JOIN_ROOM
             payload[Server.KEY_ROOM_ID] = roomId
             writer!!.write(payload.toString())

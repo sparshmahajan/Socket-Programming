@@ -24,7 +24,7 @@ object Client {
             var msg: String?
             while (socket!!.isConnected) {
                 msg = scanner.nextLine()
-                val payload: MutableMap<String, String?> = HashMap()
+                val payload = mutableMapOf<String?, String?>()
                 payload[Server.KEY_MESSAGE] = msg
                 payload[Server.KEY_USER_ID] = clientId
                 payload[Server.KEY_USER_NAME] = clientName

@@ -28,7 +28,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
     }
 
     // List of clients
-    private var clients: MutableList<Client> = ArrayList()
+    private var clients = mutableListOf<Client>()
 
     /**
      * Method to start the server
@@ -61,7 +61,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
                             val data = client.reader!!.readLine()
 
                             //parse the data to a map
-                            val map: Map<String, String> = Utils.messageToMap(data)
+                            val map = Utils.messageToMap(data)
 
                             //if method new user
                             if (map[KEY_TYPE] == METHOD_NEW_USER) {
@@ -87,7 +87,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
      */
     private fun sendIDToClient(client: Client) {
         try {
-            val map: MutableMap<String, String?> = HashMap()
+            val map = mutableMapOf<String?, String?>()
             map[KEY_USER_ID] = client.clientId
             map[KEY_USER_NAME] = client.clientName
             map[KEY_TYPE] = METHOD_GET_ID
@@ -179,7 +179,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
             //send the message to all the clients except the sender
             if (client.clientId == senderId) return@forEach
             try {
-                val map: MutableMap<String, String?> = HashMap()
+                val map = mutableMapOf<String?, String?>()
                 map[KEY_TYPE] = METHOD_SEND_MSG
                 map[KEY_MESSAGE] = message
                 map[KEY_USER_NAME] = senderName

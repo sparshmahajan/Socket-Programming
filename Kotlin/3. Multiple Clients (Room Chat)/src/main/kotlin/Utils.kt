@@ -22,15 +22,15 @@ class Utils {
         fun generateRoomId(roomsList: List<Room>): String {
             val min = 1000
             val max = 10000
-            val roomId = (Math.random() * (max - min) + min).toInt()
+            val roomId = (Math.random() * (max - min) + min).toInt().toString()
 
             //check if room id already exists
-            return if (roomsList.any { roomId == Integer.parseInt(it.roomId) }) {
+            return if (roomsList.any { roomId == it.roomId }) {
                 //if room id already exists, generate a new one
                 generateRoomId(roomsList)
             } else {
                 //if room id does not exist, return it
-                roomId.toString()
+                roomId
             }
         }
 
@@ -41,7 +41,7 @@ class Utils {
          * @return convert  map
          */
         fun messageToMap(data: String): Map<String, String> {
-            val map: MutableMap<String, String> = HashMap()
+            val map = mutableMapOf<String, String>()
             val pairs =
                 data.substring(1, data.length - 1).split(", ")
             for (pair in pairs) {

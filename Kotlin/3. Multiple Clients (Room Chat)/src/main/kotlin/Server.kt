@@ -35,7 +35,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
     }
 
     // List of rooms
-    private var rooms: MutableList<Room> = ArrayList()
+    private var rooms = mutableListOf<Room>()
 
     /**
      * Method to start the server
@@ -69,7 +69,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
                             val data = client.reader!!.readLine()
 
                             //parse the data to a map
-                            val map: Map<String, String> = Utils.messageToMap(data)
+                            val map = Utils.messageToMap(data)
 
                             //if method new user
                             if (map[KEY_TYPE] == METHOD_NEW_USER) {
@@ -99,7 +99,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
      */
     private fun sendIDToClient(client: Client) {
         try {
-            val map: MutableMap<String, String?> = HashMap()
+            val map = mutableMapOf<String?, String?>()
             map[KEY_USER_ID] = client.clientId
             map[KEY_USER_NAME] = client.clientName
             map[KEY_TYPE] = METHOD_GET_ID
@@ -169,7 +169,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
     private fun createRoom(client: Client) {
 
         //generate a unique room id in range 1000-9999
-        val roomId: String = Utils.generateRoomId(rooms)
+        val roomId = Utils.generateRoomId(rooms)
 
         //create a new room with the generated id
         val room = Room(
@@ -181,7 +181,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
         rooms.add(room)
         try {
             //send the room id to the client
-            val response: MutableMap<String, String> = HashMap()
+            val response = mutableMapOf<String?, String?>()
             response[KEY_TYPE] = METHOD_CREATE_ROOM
             response[KEY_ROOM_ID] = roomId
             client.writer!!.write(response.toString())
@@ -211,7 +211,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
             }
             try {
                 //send the room id to the client with success message
-                val response: MutableMap<String, String?> = HashMap()
+                val response = mutableMapOf<String?, String?>()
                 response[KEY_TYPE] = METHOD_JOIN_ROOM
                 response[KEY_ROOM_ID] = roomId
                 response[KEY_MESSAGE] = "success"
@@ -226,7 +226,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
         else {
             try {
                 //send failure message to the client
-                val response = mutableMapOf<String, String>()
+                val response = mutableMapOf<String?, String?>()
                 response[KEY_TYPE] = METHOD_JOIN_ROOM
                 response[KEY_MESSAGE] = "fail"
                 client.writer!!.write(response.toString())
@@ -250,9 +250,10 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
         }
         println("Client Disconnected: ${client.clientName}")
 
-        //iterate through all the rooms for searching the client to disconnect
+        //label to break out of the outer loop
         run breakLoop@{
 
+            //iterate through all the rooms for searching the client to disconnect
             rooms.forEach { room ->
 
                 //iterate through all the clients in the current room
@@ -278,6 +279,8 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
                 if (clients.size == 0) {
                     rooms.remove(room)
                     println("Room ${room.roomId} deleted")
+
+                    //break out of the outer loop
                     return@breakLoop
                 }
 
@@ -305,7 +308,7 @@ class Server internal constructor(private var serverSocket: ServerSocket) {
             //send the message to all the clients except the sender
             if (client.clientId == senderId) return@forEach
             try {
-                val map: MutableMap<String, String?> = HashMap()
+                val map = mutableMapOf<String?, String?>()
                 map[KEY_TYPE] = METHOD_SEND_MSG
                 map[KEY_MESSAGE] = message
                 map[KEY_USER_NAME] = senderName
