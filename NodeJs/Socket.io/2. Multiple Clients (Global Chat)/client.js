@@ -11,6 +11,7 @@ let isUsernameSaved = null;
  * 1. socket.on('connect') is triggered when the client is connected to the server
  * 2. socket.on('chat message') is triggered when the server sends a message to the client
  * 3. socket.on('new user') is triggered when the server sends a message to the client
+ * 4. socket.on('disconnect') is triggered when the server is disconnected from the client
  */
 socket.on("connect", () => {
     console.log("connected");
@@ -33,6 +34,11 @@ socket.on("chat message", (payload) => {
     // otherwise, message prompt will continue to be shown for every msg received
     else sendMsg();
 });
+
+socket.on("disconnect", () => {
+    console.log("\nServer Disconnected");
+    process.exit();
+})
 
 /**
  * @description
@@ -72,6 +78,7 @@ const getName = () => {
         //save the name
         isUsernameSaved = name;
 
+        console.log("Entered in the chat");
         //start the message prompt for this user
         sendMsg();
     });

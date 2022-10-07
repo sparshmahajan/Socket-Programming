@@ -93,6 +93,10 @@ io.on("connection", (socket) => {
 
             //remove the client from the clients list object
             const name = clients[socket.id].name;
+
+            //client disconnected before sending his name
+            if(!name) return;
+
             console.log(`${name} disconnected`);
             delete clients[socket.id];
 

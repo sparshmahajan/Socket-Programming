@@ -39,6 +39,9 @@ io.on("connection", (socket) => {
         //getting the name of the client who disconnected
         const name = clients[socket.id].name;
 
+        //client disconnected before sending his name
+        if(!name) return;
+
         console.log(`${name} disconnected`);
 
         //remove the disconnected client from the clients object

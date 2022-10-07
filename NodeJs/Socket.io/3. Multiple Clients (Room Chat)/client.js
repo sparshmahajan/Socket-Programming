@@ -14,6 +14,7 @@ let roomId = null;
  * 3. socket.on('new user') is triggered when a new user joins the room
  * 4. socket.on('create room') is triggered when a room is created
  * 5. socket.on('join room') is triggered when a room is joined
+ * 6. socket.on('disconnect') is triggered when the server is disconnected from the client
  */
 socket.on("connect", () => {
     console.log("connected");
@@ -45,6 +46,11 @@ socket.on('create room', (id) => {
     //now get the username after creating the room
     getName();
 });
+
+socket.on("disconnect", () => {
+    console.log("\nServer Disconnected");
+    process.exit();
+})
 
 socket.on('join room', (payload) => {
     //checking if the room exists or not
@@ -138,6 +144,7 @@ const getName = () => {
         //save the username for future use
         isUsernameSaved = name;
 
+        console.log("Entered in the chat room");
         //start the message prompt for this user
         sendMsg();
     });
