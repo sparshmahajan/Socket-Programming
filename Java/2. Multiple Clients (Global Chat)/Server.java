@@ -118,7 +118,7 @@ public class Server {
 
         //searching for the client
         for (int i = 0; i < clients.size(); i++) {
-            if(clients.get(i).clientId.equals(senderId)){
+            if (clients.get(i).clientId.equals(senderId)) {
                 clients.get(i).clientName = senderName;
                 break;
             }
@@ -151,6 +151,11 @@ public class Server {
      * @param client client to disconnect
      */
     public void disconnectClient(Client client) {
+        //client disconnected before without entering a name
+        if (client.clientName == null) {
+            return;
+        }
+
         System.out.println("Client Disconnected: " + client.clientName);
 
         //remove the client from the list

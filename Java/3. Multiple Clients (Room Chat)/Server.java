@@ -283,6 +283,12 @@ public class Server {
      * @param client client to disconnect
      */
     public void disconnectClient(Client client) {
+        //client disconnected before joining any room
+        if (client.clientName == null) {
+            return;
+        }
+
+        System.out.println("Client Disconnected: " + client.clientName);
 
         //iterate through all the rooms for searching the client to disconnect
         for (Room room : rooms) {
