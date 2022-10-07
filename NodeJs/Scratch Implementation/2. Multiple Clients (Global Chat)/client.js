@@ -12,6 +12,7 @@ let userId;
  * 1. socket.on('open') is triggered when the client is connected to the server
  * 2. socket.on('message') is triggered when the client receives a message from the server
  * 3. socket.on('error') is triggered when the client encounters an error
+ * 4. socket.on('close') is triggered when the server is disconnected from the client
  */
 socket.on('open', () => {
     console.log('connected');
@@ -49,6 +50,10 @@ socket.on('error', () => {
     console.log("Error Connecting to Server");
 })
 
+socket.on('close', () => {
+    console.log("\nServer Disconnected");
+    process.exit();
+})
 
 
 /**
@@ -96,6 +101,7 @@ const getName = () => {
         //save the name
         isUsernameSaved = true;
 
+        console.log("Entered in global chat");
         //start the message prompt for this user
         sendMsg();
     });

@@ -50,6 +50,10 @@ wss.on("connection", (ws) => {
     ws.on("close", () => {
         //id remain persisted because of closure
         const name = clients[id].name;
+
+        //when client disconnected without sending name
+        if(!name) return;
+
         console.log(`${name} disconnected`);
 
         //remove the disconnected client from the clients object

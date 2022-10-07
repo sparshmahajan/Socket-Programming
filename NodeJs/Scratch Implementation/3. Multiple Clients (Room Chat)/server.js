@@ -119,6 +119,10 @@ wss.on("connection", (ws) => {
 
             //remove the client from the clients list object
             const name = clients[clientId].name;
+
+            //when client is disconnected without sending a name
+            if(!name) return;
+
             console.log(`${name} disconnected`);
             delete clients[clientId];
 
