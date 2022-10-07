@@ -18,7 +18,7 @@ public class Server {
 
     // Room class for storing room information
     static class Room {
-        int roomId;
+        String roomId;
         List<Client> clients;
     }
 
@@ -134,12 +134,12 @@ public class Server {
         //get client info from map
         String senderId = map.get(KEY_USER_ID);
         String senderName = map.get(KEY_USER_NAME);
-        int roomId = Integer.parseInt(map.get(KEY_ROOM_ID));
+        String roomId = map.get(KEY_ROOM_ID);
 
         //getting room of the client from the list of rooms
         int roomIndex = 0;
         for (int i = 0; i < rooms.size(); i++) {
-            if (rooms.get(i).roomId == roomId) {
+            if (rooms.get(i).roomId.equals(roomId)) {
                 roomIndex = i;
                 break;
             }
@@ -175,13 +175,13 @@ public class Server {
         //getting sender info from map
         String senderId = map.get(KEY_USER_ID);
         String senderName = map.get(KEY_USER_NAME);
-        int roomId = Integer.parseInt(map.get(KEY_ROOM_ID));
+        String roomId = map.get(KEY_ROOM_ID);
         String msg = map.get(KEY_MESSAGE);
 
         //getting client list from the room list using room id
         List<Client> clients = null;
         for (int i = 0; i < rooms.size(); i++) {
-            if (rooms.get(i).roomId == roomId) {
+            if (rooms.get(i).roomId.equals(roomId)) {
                 clients = rooms.get(i).clients;
                 break;
             }
@@ -198,7 +198,7 @@ public class Server {
     private void createRoom(Client client) {
 
         //generate a unique room id in range 1000-9999
-        int roomId = Utils.generateRoomId(rooms);
+        String roomId = String.valueOf(Utils.generateRoomId(rooms));
 
         //create a new room
         Room room = new Room();
@@ -213,7 +213,7 @@ public class Server {
             //send the room id to the client
             Map<String, String> response = new HashMap<>();
             response.put(KEY_TYPE, METHOD_CREATE_ROOM);
-            response.put(KEY_ROOM_ID, String.valueOf(roomId));
+            response.put(KEY_ROOM_ID, roomId);
             client.writer.write(response.toString());
             client.writer.newLine();
             client.writer.flush();
@@ -226,13 +226,13 @@ public class Server {
     private void joinRoom(Map<String, String> map, Client client) {
 
         //get room id from map to which the client wants to join
-        int roomId = Integer.parseInt(map.get(KEY_ROOM_ID));
+        String roomId = map.get(KEY_ROOM_ID);
 
         //for checking if the room exists
         boolean isRoomExist = false;
 
         for (int i = 0; i < rooms.size(); i++) {
-            if (rooms.get(i).roomId == roomId) {
+            if (rooms.get(i).roomId.equals(roomId)) {
                 isRoomExist = true;
                 break;
             }
@@ -241,7 +241,7 @@ public class Server {
         //if room exists
         if (isRoomExist) {
             for (int i = 0; i < rooms.size(); i++) {
-                if (rooms.get(i).roomId == roomId) {
+                if (rooms.get(i).roomId.equals(roomId)) {
                     //add the client to the client list of the room
                     rooms.get(i).clients.add(client);
                     break;
@@ -252,7 +252,7 @@ public class Server {
                 //send the room id to the client with success message
                 Map<String, String> response = new HashMap<>();
                 response.put(KEY_TYPE, METHOD_JOIN_ROOM);
-                response.put(KEY_ROOM_ID, String.valueOf(roomId));
+                response.put(KEY_ROOM_ID, roomId);
                 response.put(KEY_MESSAGE, "success");
                 client.writer.write(response.toString());
                 client.writer.newLine();

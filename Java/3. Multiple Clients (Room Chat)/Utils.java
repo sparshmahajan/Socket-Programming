@@ -26,7 +26,7 @@ public class Utils {
         int roomId = (int) (Math.random() * (max - min) + min);
 
         for (Server.Room room : roomsList) {
-            if (room.roomId == roomId) {
+            if (roomId == Integer.parseInt(room.roomId)) {
                 return generateRoomId(roomsList);
             }
         }

@@ -12,7 +12,7 @@ public class Client {
     //variables for the client
     static Socket socket;
     static String clientId;
-    static int roomId;
+    static String roomId;
     static String clientName;
     static BufferedReader reader;
     static BufferedWriter writer;
@@ -60,7 +60,7 @@ public class Client {
 
                 //if method get id
                 if (payload.get(Server.KEY_TYPE).equals(Server.METHOD_GET_ID)) {
-                    getIdFromServer(payload);
+                    getClientIdFromServer(payload);
                 }
                 //if method send message
                 else if (payload.get(Server.KEY_TYPE).equals(Server.METHOD_SEND_MSG)) {
@@ -88,7 +88,7 @@ public class Client {
      *
      * @param payload payload to get the id from
      */
-    private static void getIdFromServer(Map<String, String> payload) {
+    private static void getClientIdFromServer(Map<String, String> payload) {
         //get the id from the payload
         clientId = payload.get(Server.KEY_USER_ID);
 
@@ -116,7 +116,7 @@ public class Client {
      */
     public static void getRoomIdFromServer(Map<String, String> payload) {
         //get the room id from the payload
-        roomId = Integer.parseInt(payload.get(Server.KEY_ROOM_ID));
+        roomId = payload.get(Server.KEY_ROOM_ID);
         System.out.println("Room " + roomId + " created");
 
         //now get the name of the user
@@ -136,16 +136,19 @@ public class Client {
     public static void joinRoomFromServer(Map<String, String> payload) {
         //get message from the payload
         String msg = payload.get(Server.KEY_MESSAGE);
-        int roomId = Integer.parseInt(payload.get(Server.KEY_ROOM_ID));
+        roomId = payload.get(Server.KEY_ROOM_ID);
 
         //if room exists
-        if (msg.equals("success")) {
-            System.out.println("Room " + roomId + " joined");
-        } else {
+        if (msg.equals("fail")) {
             System.out.println("Room not found");
 
             //show choices again
             showChoices();
+
+            // don't go further after showChoices recursion call returns
+            return;
+        } else {
+            System.out.println("Room " + roomId + " joined");
         }
 
         //now get the name of the user
@@ -236,13 +239,12 @@ public class Client {
         //get room id from console
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter room id: ");
-        roomId = scanner.nextInt();
+        String roomId = scanner.nextLine();
         try {
             //send req to the server to join a room
             Map<String, String> payload = new HashMap<>();
             payload.put(Server.KEY_TYPE, Server.METHOD_JOIN_ROOM);
-            payload.put(Server.KEY_USER_ID, clientId);
-            payload.put(Server.KEY_ROOM_ID, String.valueOf(roomId));
+            payload.put(Server.KEY_ROOM_ID, roomId);
             writer.write(payload.toString());
             writer.newLine();
             writer.flush();
